@@ -1,69 +1,60 @@
 
-# Import the json library because we need to read data from the tasks.json file.
-import json
+# This line imports the requests library so the program can retrieve data from the TimeAPI website.
+import requests
 
+# This line imports the datetime and timezone classes so the program can work with dates, times, and UTC values.
+from datetime import datetime, timezone
 
-# Create the Task_type class because we need to store information about each task category.
-class Task_type:
+# This line sends a GET request to the TimeAPI website so the program can retrieve the current date and time.
+response = requests.get("https://timeapi.io/api/Time/current/zone?timeZone=America/Chicago")
 
-    # Create the constructor because each Task_type object needs initial values.
-    def __init__(self, name, display_name, tasks_per_semester, maximum_points_per_task):
+# This line converts the API response into a Python dictionary so the program can access the returned information.
+data = response.json()
 
-        # Store the task name because we need to identify the task category.
-        self.name = name
+# This line assigns "N/A" to the client_ip variable because the TimeAPI service does not provide the client's IP address.
+client_ip = "N/A"
 
-        # Store the display name because we need a readable task description.
-        self.display_name = display_name
+# This line extracts the dateTime value from the JSON response so the program can perform date calculations.
+date_time_string = data["dateTime"]
 
-        # Store the number of tasks because we need it to calculate total points.
-        self.tasks_per_semester = tasks_per_semester
+# This line converts the dateTime string into a datetime object so the program can use Python's date functions.
+current_datetime = datetime.fromisoformat(date_time_string)
 
-        # Store the maximum points because we need it to calculate total points.
-        self.maximum_points_per_task = maximum_points_per_task
+# This line calculates the current day of the year so the program can display and use this value later.
+day_of_year = current_datetime.timetuple().tm_yday
 
+# This line retrieves the current UTC date and time so the program can display the universal time.
+utc_datetime = datetime.now(timezone.utc)
 
-# Open the tasks.json file because the program needs to read task information.
-with open("tasks.json", "r") as file:
+# This line converts the current datetime into a Unix timestamp so the program can recreate the current date later.
+unixtime = int(current_datetime.timestamp())
 
-    # Convert the JSON data into a Python dictionary so it can be used.
-    task_data = json.load(file)
+# This line displays the client IP value so the required assignment output is produced.
+print("client_ip:", client_ip)
 
+# This line displays the current day of the year so the required assignment output is produced.
+print("day_of_year:", day_of_year)
 
-# Create an empty list because we need to store all Task_type objects.
-task_types = []
+# This line displays the current UTC date and time so the required assignment output is produced.
+print("utc_datetime:", utc_datetime)
 
+# This line displays the Unix timestamp so the required assignment output is produced.
+print("unixtime:", unixtime)
 
-# Loop through each task in the JSON file because each task needs a class object.
-for task in task_data["tasks"]:
+# This line stores the day of the year when the course began so the program can calculate course progress.
+begin_course_day = datetime(2026, 6, 8).timetuple().tm_yday
 
-    # Create a new Task_type object using values loaded from the JSON file.
-    new_task = Task_type(
-        task["name"],
-        task["displayName"],
-        task["numberOfTasksPerSemester"],
-        task["maximumPointsPerSubmission"]
-    )
+# This line creates a datetime object from the Unix timestamp so the program can calculate the current date.
+now_date = datetime.fromtimestamp(unixtime)
 
-    # Add the Task_type object to the list because we need all task types together.
-    task_types.append(new_task)
+# This line calculates the current day of the year so it can be compared with the course start day.
+now_day = now_date.timetuple().tm_yday
 
+# This line calculates the number of days that have passed since the course began so the current Unit can be determined.
+days_elapsed = now_day - begin_course_day
 
-# Create a variable starting at zero because we will add points from each task type.
-total_maximum_points = 0
+# This line divides the elapsed days by seven and removes the decimal portion so the completed Units are calculated.
+completed_units = days_elapsed // 7
 
-
-# Loop through each task object because we need to calculate all possible points.
-for task in task_types:
-
-    # Multiply tasks by points per task because this gives the total for this category.
-    task_total_points = (
-        task.tasks_per_semester *
-        task.maximum_points_per_task
-    )
-
-    # Add the category total because we need the maximum grade for the whole class.
-    total_maximum_points += task_total_points
-
-
-# Display the maximum grade because the user needs to see the final calculation.
-print("Maximum grade you can get for this class is:", total_maximum_points)
+# This line displays the completed Units so the user can see current course progress.
+print(f"You have completed {completed_units} Units of 8.")
